@@ -33,7 +33,7 @@ class BookShelf extends Component {
         return this.state.books.filter( b => b.shelf === shelfName)
     }
 
-    componentWillMount () {
+    componentDidMount () {
         this.fetchBooks()
     }
 

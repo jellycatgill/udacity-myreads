@@ -6,9 +6,6 @@ import { Link } from 'react-router-dom'
 
 const toolbar = (props) => {
 
-    let booksNav = ""
-
-    
     return   (
         <header>
             <div className="list-books-title">

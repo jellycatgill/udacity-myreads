@@ -7,10 +7,8 @@ class Layout extends Component {
 
 
     render () {
-
-        const childrenWithProps = React.Children.map(this.props.children, child =>
-            React.cloneElement(child, { showNav: this.showNavHandler }));
-
+        //const childrenWithProps = React.Children.map(this.props.children, child =>
+        //    React.cloneElement(child, { showNav: this.showNavHandler }));
 
         return (
             <Auxy>

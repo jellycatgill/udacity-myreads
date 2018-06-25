@@ -10,35 +10,39 @@ class BookSearch extends Component {
     state = {
         query: "",
         books: [],
-    }    
+    }        
 
-    componentWillUpdate () {
-        console.log('[BookSearch: Update] ' + this.state.query)        
+    componentDidUpdate () {
+        console.log('[BookSearch: Update] ' + this.state.query + ' '+ this.state.query.length) 
+        console.log(this.state.books)
     }
-
-    componentWillMount () {
-        this.fetchBooks()
-    }
-
 
     changeQueryHandler = (newQuery) => {
 
-        this.setState( (prevState) => {
-            return {query: newQuery}
-        })
+        if (newQuery === "") {
+            this.setState( (prevState) => {
+                return {query: "",books:[]}
+            })
+        }
+        else {
+            BooksAPI.search(newQuery).then(books => {
+                if (books.error) {
+                    this.setState( (prevState) => {
+                        return {query: "",books:[]}
+                    })
+                }
+                else {
+                    this.setState( (prevState) => {
+                        return {query: newQuery,books:books}
+                    })
+                }
+            })
+        }
 
-        this.setState({},() => this.forceUpdate())
     }
 
 
-    fetchBooks () {
-        BooksAPI.getAll().then(books => {
-            this.setState({books})
-        })
-    }
-
-    
-    getBooksByQuery() {
+    getBooksByQuery1() {
         console.log('[BookSearch/getBooksByQuery] ',this.state.query)
         let searchQuery = this.state.query.toLowerCase()
         console.log('searchQuery '+searchQuery)
@@ -57,6 +61,18 @@ class BookSearch extends Component {
         return(filteredBooks)
     }
 
+    getBooksByQuery() {
+        if (this.state.query === "") {
+            return []
+        }
+
+        BooksAPI.search(this.state.query).then(books => {
+            this.setState({books})
+        })
+        return 
+
+    }
+
 
 
     changeShelfHandler = (book,newShelf) => {
@@ -73,7 +89,7 @@ class BookSearch extends Component {
         return (
             <div>
                 <QueryBox changeQuery={this.changeQueryHandler} />
-                <BookList heading="" books={this.getBooksByQuery()} changeShelf={this.changeShelfHandler} />
+                <BookList heading="" books={this.state.books} changeShelf={this.changeShelfHandler} />
             </div>
         )
     }
@@ -82,6 +98,6 @@ class BookSearch extends Component {
 export default BookSearch
 
 BookSearch.propTypes = {
-    query: PropTypes.string.isRequired
+    query: PropTypes.string
 }
 
