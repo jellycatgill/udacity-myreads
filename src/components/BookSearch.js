@@ -10,14 +10,26 @@ class BookSearch extends Component {
     state = {
         query: "",
         books: [],
+        books_all: [],
     }        
+
+    findBookInList = id => {
+        return this.state.books_all.findIndex(book => book.id === id)
+    }
 
     componentDidUpdate () {
         console.log('[BookSearch: Update] ' + this.state.query + ' '+ this.state.query.length) 
         console.log(this.state.books)
     }
 
-    changeQueryHandler = (newQuery) => {
+    componentDidMount () {
+        console.log('[BookSearch: Mounted] ' + this.state.query + ' '+ this.state.query.length) 
+        BooksAPI.getAll().then(books_all => {
+            this.setState({books_all})
+        })
+    }
+
+    changeQueryHandler = (newQuery='') => {
 
         if (newQuery === "") {
             this.setState( (prevState) => {
@@ -26,50 +38,28 @@ class BookSearch extends Component {
         }
         else {
             BooksAPI.search(newQuery).then(books => {
-                if (books.error) {
+                if (books.error || books.length === 0) {
                     this.setState( (prevState) => {
                         return {query: "",books:[]}
                     })
                 }
                 else {
+
+                    books = books.map(book => {
+                        const idx = this.findBookInList(book.id);
+                        return idx !== -1
+                          ? this.state.books_all[idx]
+                          : Object.assign(book, { shelf: "none" });
+                      });
+
+                    
+
                     this.setState( (prevState) => {
                         return {query: newQuery,books:books}
                     })
                 }
             })
         }
-
-    }
-
-
-    getBooksByQuery1() {
-        console.log('[BookSearch/getBooksByQuery] ',this.state.query)
-        let searchQuery = this.state.query.toLowerCase()
-        console.log('searchQuery '+searchQuery)
-        // const filteredBooks = this.state.books.filter( b => b.title.toLowerCase().includes(searchQuery) )
-        
-        console.log(this.state.books)
-
-        const filteredBooks = this.state.books.filter( function(b) {
-            let book_title = b.title.toLowerCase()
-            const reducer = (acc,cur) => acc + cur.toLowerCase()
-            let book_author = b.authors.reduce(reducer).toLowerCase()
-            console.log("Authors "+book_author)
-            return ( book_title.includes(searchQuery) || book_author.includes(searchQuery)  )
-        })
-        
-        return(filteredBooks)
-    }
-
-    getBooksByQuery() {
-        if (this.state.query === "") {
-            return []
-        }
-
-        BooksAPI.search(this.state.query).then(books => {
-            this.setState({books})
-        })
-        return 
 
     }
 
